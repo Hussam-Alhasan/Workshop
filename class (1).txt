@@ -1,0 +1,225 @@
+﻿Feature: Managing a class
+	Scenario: Go to class view
+		Given I am logged in
+		And I am a teacher
+		And I am on page "profiel"
+		When I press "Mijn klas"
+		Then I go to page "klas"
+		And I see "Klas toevoegen"
+		
+	Scenario: Adding class visible only for teachers
+		Given I am logged in
+		And I am not a teacher
+		When I am on page "profiel"
+		Then I do not see "Klas toevoegen"
+		
+		
+	Scenario: Blockade of adding class by a user without teacher status
+		Given I am logged in
+		And I am not a teacher
+		And I am on page "profiel"
+		When I press "Mijn klas"
+		Then I go to page "klas"
+		And I do not see "Klas toevoegen"		
+		
+		
+	Scenario: Go to window of class creation
+		Given I am logged in
+		And I am a teacher
+		And I am on page "klas"
+		When I press "Klas toevoegen"
+		Then the system opens window "Klas maken"
+		
+	Scenario: Creation of class
+		Given I am logged in
+		And I am a teacher
+		And I am on page "klas"	
+		And I see window "Nieuwe klas"
+		When I fill in "titel" with "TestClass"
+		And I fill in "beschrijving" with "Beschrijving controleren"
+		And I press "creëren"
+		Then I go to page "klas"
+		And I see "U hebt succesvol een klas gemaakt"
+	
+	Scenario: Entering view of class
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And I am on page "klas"
+		When I press "TestClass"
+		Then I go to page "klas/TestClass"
+
+	Scenario: View of class management panel
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And I am on page "klas/TestClass"
+		When I press "Managen"
+		Then I go to page "klas/TestClass/managen"
+	
+	Scenario: Opening windows to add student to class
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And I am on page "klas/TestClass/managen"
+		When I press "Student toevoegen"
+		Then system opens window "Klas toevoegen"
+		
+	Scenario: Sending an invitation to user
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And I am on page "klas/TestClass/managen"
+		And I see window "Klas toevoegen"
+		And the user "userTest" exists
+		When I fill in "username" with "userTest"
+		And I press "Gebruiker uitnodigen"
+		Then the system invites "userTest" to class "TestClass"
+		And I see "Uitnodiging wordt verstuurd"
+		
+	Scenario: Sending an invitation to I which does not exist
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And I am on page "klas/TestClass/managen"
+		And I see window "Klas toevoegen"
+		And the user "userTest" not exists
+		When I fill in "username" with "userTest"
+		And press "Gebruiker uitnodigen"
+		Then I see "Gebruiker is niet gevonden"
+		
+		
+	Scenario: Sending an invitation by e-mail
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And I am on page "klas/TestClass/managen"
+		And I see window "Klas toevoegen"
+		When I fill in "e-mail" with "test@mail.nl"
+		And I press "Gebruiker uitnodigen"
+		Then the system sends invitation e-mail to "test@mail.nl"
+		And I see "Uitnodiging wordt verstuurd"
+		
+		
+	Scenario: Accepting an invitation to the class
+		Given I am logged in
+		And I am on page "profiel/notificaties"
+		And I have an invitation to class "TestClass"
+		And I see "Uitnodiging voor TestClass"
+		When I press "Accepteren"
+		Then I go to page "klas/TestClass"
+		And I see "Welcome to TestClass"
+		
+		
+		
+	Scenario: Assigning article to class as a teacher
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And I am on page "profiel/schrijven"
+		When I fill in "titel" with "TestArticle1"
+		And I fill in "Definitie" with 40 random words
+		And I fill in "betekenis" with 248 random words 
+		And I fill in "keywords" with "TEST"
+		And I fill in "categorie" with "TEST"
+		And I select "TestClass" on list "Classes"
+		And I press "ensie opslaan en plaatsen"
+		Then I see "Goed work!"
+		And class "TestClass" contains the article called "TestArticle1"
+		
+	
+	Scenario: Assigning article to class as a student
+		Given I am logged in
+		And I am a student of "TestClass"
+		And I am on page "profiel/schrijven"
+		When I fill in "titel" with "TestArticle2"
+		And I fill in "Definitie" with 40 random words
+		And I fill in "betekenis" with 248 random words
+		And I fill in "keywords" with "TEST"
+		And I fill in "categorie" with "TEST"
+		And I select "TestClass" on list "Classes"
+		And I press "ensie opslaan en plaatsen"
+		Then I see "Goed gedaan!"
+		And class "TestClass" contains the article called "TestArticle2"
+		
+			
+	Scenario: Opening article from the class
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And I am on page "klas/TestClass"
+		And class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Pending"
+		When I press "Test Article1"
+		Then I go to page "klas/TestClass/testuser/TestArticle1"
+		And I see "Accepteren"
+		And I see "Juist"
+		And I see "Afwijzen"
+			
+			
+	Scenario: Accepting the article by a teacher in the class
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Pending"
+		And I am on page "klas/TestClass/testUser/TestArticle1"
+		When I press "Accepteren"
+		Then the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Geaccepteerd"
+	
+	Scenario: Rejecting the article by a teacher in the class
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Pending"
+		And I am on page "klas/TestClass/testUser/TestArticle1"
+		When I press " Afwijzen "
+		Then the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Afwijzened"
+	
+	Scenario: Beginning of correction of the article by a teacher in the class
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Pending"
+		And I am on page "klas/TestClass/testUser/TestArticle1"
+		When I press "Contoleren"
+		Then I go to page "klas/TestClass/testUser/TestArticle1/Contoleren"
+		
+	Scenario: Correcting the article by a teacher
+		Given I am logged in
+		And I am a teacher
+		And I have a class "TestClass"
+		And the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Pending"
+		And I am on page "klas/TestClass/testUser/TestArticle1/contoleren"
+		When I replace some words in "Definitie"
+		And I fill in "comment" with 10 random words
+		And I press "Bevestigen"
+		Then the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Gecontroleerd"
+		
+	Scenario: Going back to fix the article after a teacher assigned it as "Gecontroleerd"
+		Given I am logged in
+		And my username is "testUser"
+		And I am a student of "TestClass"
+		And the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Gecontroleerd"
+		When I press "TestArticle1"
+		Then I go to page "profiel/bewerken/TestClass"
+		
+	Scenario: Fixing the article to send back to the teacher for acceptance in the class
+		Given I am logged in
+		And my username is "testUser"
+		And I am a student of "TestClass"
+		And the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Corrected"
+		And I am on page "profiel/bewerken/TestClass"
+		When I replace some words in "Definitie"
+		And I press "ensie opslaan en plaatsen"
+		Then the class "TestClass" contains the article called "TestArticle1" written by "testUser" with a status "Pending"
+		
+
+	
+	
+		
+
+
+
+
+
+
+		
